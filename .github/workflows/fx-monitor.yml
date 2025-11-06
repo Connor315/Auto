@@ -1,0 +1,46 @@
+name: Run FX Monitor (Hourly 9–5 Toronto)
+
+on:
+  schedule:
+    - cron: '0 15 * * *'   # 10 AM Toronto ≈ 15:00 UTC
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  
+jobs:
+  run_fx_monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # allow commit/push
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dotenv certifi
+
+      - name: Run FX Monitor
+        run: |
+          python fx_monitor.py
+        env:
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
+          EXCHANGE_API_KEY: ${{ secrets.EXCHANGE_API_KEY }}
+
+      - name: Commit updated rates_log.txt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add rates_log.txt
+          git commit -m "Update FX log [skip ci]" || echo "No changes to commit"
+          git push

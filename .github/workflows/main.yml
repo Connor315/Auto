@@ -1,0 +1,44 @@
+name: Run Weather and Gas Scripts
+
+on:
+  schedule:
+    - cron: '30 21 * * *'  # 5:30 PM Toronto time → gas.py
+    - cron: '0 2 * * *'    # 10:00 PM Toronto time → weather.py
+  workflow_dispatch:       # Allow manual triggering
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 pytz python-dotenv
+
+      - name: Run appropriate script
+        run: |
+          current_hour=$(TZ="America/Toronto" date +'%H')
+          if [ "$current_hour" -eq 17 ]; then
+            echo "Running gas.py (5:30 PM Toronto time)"
+            python gas.py
+          elif [ "$current_hour" -eq 22 ]; then
+            echo "Running weather.py (10:00 PM Toronto time)"
+            python weather.py
+          else
+            echo "Manual run: neither 5:30 PM nor 10 PM Toronto time."
+            python gas.py
+            python weather.py
+          fi
+        env:
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
