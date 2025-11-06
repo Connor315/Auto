@@ -1,4 +1,4 @@
-name: Run FX Monitor (Hourly 9–5 Toronto)
+name: Run FX Monitor
 
 on:
   schedule:
