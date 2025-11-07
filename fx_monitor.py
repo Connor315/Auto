@@ -66,17 +66,14 @@ def analyze_rate(pair, current_rate):
     else:
         status, color, reason = "Stable", "gray", f"{pair} within ±1% of 7-day avg"
 
-    # Determine transfer direction explicitly per pair
-    base, quote = pair.split('-')
-
     # Logic per currency pair
     if pair == "USD-CAD":
         # High USD/CAD means USD is strong, CAD is weak
         suggestion = "Transfer CAD → USD" if status == "Strong" else "Transfer USD → CAD"
     elif pair == "USD-CNY":
-        suggestion = "Transfer CAD → USD first (then to CNY)" if status == "Strong" else "Hold or transfer USD → CAD"
+        suggestion = "Transfer CAD → USD" if status == "Strong" else "Transfer USD → CAD"
     elif pair == "USD-HKD":
-        suggestion = "Transfer CAD → USD (HKD pegged to USD)" if status == "Strong" else "Hold or reverse"
+        suggestion = "Transfer CAD → USD" if status == "Strong" else "Transfer HKD → USD"
     elif pair == "CAD-CNY":
         # High CAD/CNY means CAD is strong, good time to send CAD abroad
         suggestion = "Transfer CAD → CNY" if status == "Strong" else "Transfer CNY → CAD"
@@ -93,7 +90,7 @@ def send_email(results):
     password = os.environ['EMAIL_PASSWORD']
     receivers = os.environ['EMAIL_RECEIVERS'].split(',')
 
-    now = datetime.now(ZoneInfo("America/Toronto")).strftime("%Y-%m-%d %H %Z")
+    now = datetime.now(ZoneInfo("America/Toronto")).strftime("%Y-%m-%d")
     subject = f"Currency Report – {now}"
 
     msg = MIMEMultipart()
