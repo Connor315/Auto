@@ -122,7 +122,7 @@ def send_email(results):
 
 # ---------- Main flow ----------
 def main():
-    now = datetime.now(ZoneInfo("America/Toronto")).strftime("%Y-%m-%d %H %Z")
+    now = datetime.now(ZoneInfo("America/Toronto")).strftime("%Y-%m-%d")
 
     try:
         usd_rates = fetch_rates("USD")
