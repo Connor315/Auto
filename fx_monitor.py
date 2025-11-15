@@ -32,21 +32,26 @@ def log_rate(pair, date_str, value):
 
 # ---------- Historical analysis ----------
 def load_recent_rates(pair, days=7):
-    """Load rates from the last `days` days for a specific currency pair."""
     if not os.path.exists(LOG_FILE):
         return []
     cutoff = datetime.now(ZoneInfo("America/Toronto")) - timedelta(days=days)
     rates = []
-    pattern = re.compile(rf"^{pair}: (\d{{4}}-\d{{2}}-\d{{2}}) .*: ([0-9.]+)$")
+
+    pattern = re.compile(
+        rf"^{pair}:\s+(\d{{4}}-\d{{2}}-\d{{2}}):\s+([0-9.]+)$"
+    )
 
     with open(LOG_FILE, "r", encoding="utf-8") as f:
         for line in f:
             match = pattern.match(line.strip())
             if match:
                 date_str, value = match.groups()
-                date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=ZoneInfo("America/Toronto"))
+                date = datetime.strptime(date_str, "%Y-%m-%d").replace(
+                    tzinfo=ZoneInfo("America/Toronto")
+                )
                 if date >= cutoff:
                     rates.append(float(value))
+
     return rates
 
 # ---------- Analysis and recommendation ----------
